@@ -20,6 +20,12 @@ enum class Colour
 static_assert(aa::enum_utils::is_countable_enum_v<Colour>);
 ```
 
+`aa::enum_utils::enum_count<E>` will alias the `std::size_t` size of a countable enum.
+
+`aa::enum_utils::invalid<E>` will alias `_Count` and is intended to be used to give flexibility to interfaces,
+
+`aa::enum_utils::valid(e)` will check if a countable enum is valid.
+
 ## `enum_array`
 
 These are arrays that are index by a countable enum.
@@ -63,6 +69,8 @@ enum_dictionary(Colour) {
 std::cout << aa::enum_utils::to_string(Colour::Blue);
 const auto c = aa::enum_utils::parse<Color>(...);
 ```
+
+`aa::enum_utils::parse<E>` is (currently) case sensitive will return `aa::enum_utils::invalid<E>` when not match is found.
 
 ## `enum_range`
 

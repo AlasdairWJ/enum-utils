@@ -71,14 +71,14 @@ private:
 template <typename It>
 struct range_t
 {
-	range_t(const It b, const It e)
+	constexpr range_t(const It b, const It e) noexcept
 		: _begin{ b }
 		, _end{ e }
 	{
 	}
 
-	It begin() const { return _begin; }
-	It end() const { return _end; }
+	constexpr It begin() const noexcept { return _begin; }
+	constexpr It end() const noexcept { return _end; }
 
 private:
 	It _begin, _end;

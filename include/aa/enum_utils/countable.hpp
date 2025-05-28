@@ -30,6 +30,12 @@ constexpr std::size_t enum_count_v = enum_count<E>::value;
 template <countable_enum E>
 constexpr E invalid = E::_Count;
 
+template <countable_enum E>
+constexpr bool valid(const E e)
+{
+	return to_underlying(e) >= std::underlying_type_t<E>{} && to_underlying(e) < to_underlying(invalid<E>);
+}
+
 } // enum_utils
 
 } // aa

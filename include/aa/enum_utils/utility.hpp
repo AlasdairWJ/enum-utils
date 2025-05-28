@@ -20,7 +20,7 @@ struct is_scoped_enum<E, std::void_t<std::underlying_type_t<E>>> : std::bool_con
 template <typename E>
 constexpr bool is_scoped_enum_v = is_scoped_enum<E>::value;
 
-template <typename E> requires is_scoped_enum_v<E>
+template <typename E> requires std::is_enum_v<E>
 constexpr auto to_underlying(const E e)
 {
 	return static_cast<std::underlying_type_t<E>>(e);
