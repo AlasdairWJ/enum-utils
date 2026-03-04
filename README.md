@@ -1,12 +1,12 @@
 # enum-utils (C++20)
- These are a bunch of enum-related structures & utilities that I actually use regularly, these are the kind of things that are totally obvious in hindsight.
+ These are a bunch of enum-related utilities that I actually use regularly, these are the kind of things that are totally obvious in hindsight.
 
 ## `countable_enum`
 
- Countable enums are scoped enums that are contiguous from 0 and include a final value of `_Count`. This allows the other utilities to automatically determine their size/range.
+ Countable enums are scoped enums that are contiguous from 0 and include a final value of `_Count` (or `EU_COUNTABLE_IDENTIFIER`). This allows the other utilities to automatically determine their size/range.
 
 ```c++
-#include <aa/enum_utils/countable.hpp>
+#include <eu/countable.hpp>
 
 enum class Colour
 {
@@ -17,106 +17,121 @@ enum class Colour
     _Count
 };
 
-static_assert(aa::enum_utils::is_countable_enum_v<Colour>);
+static_assert(eu::is_countable_enum_v<Colour>);
 ```
 
-`aa::enum_utils::enum_count<E>` will alias the `std::size_t` size of a countable enum.
+If concepts are available, the `eu::countable_enum` concept is available.
 
-`aa::enum_utils::invalid<E>` will alias `_Count` and is intended to be used to give flexibility to interfaces,
+`eu::enum_count<E>` / `eu::enum_count_v<E>` will provide the number of elements in the enum.
 
-`aa::enum_utils::valid(e)` will check if a countable enum is valid.
+`eu::invalid<E>` / `eu::invalid_v<E>` will alias `_Count` and is intended to be used to give flexibility to interfaces.
 
-## `enum_array`
+`eu::valid(e)` will check if a countable enum is valid (i.e. `0 <= e < _Count`).
 
-These are arrays that are index by a countable enum.
+## `array`
+
+These are arrays that are indexed by a countable enum, from which the side is automatically deduced.
 
 ```c++
-#include <aa/enum_utils/array.hpp>
+#include <eu/array.hpp>
 
 // ...
 
-aa::enum_utils::enum_array<Colour, int> values{};
+eu::array<Colour, int> values{};
 
-values[Colour::Red] = 10;
-values[Colour::Green] = 20;
-values[Colour::Blue] = 5;
-```
-
-## enum dictionary
-
-Provides simple enum-string conversions, but is restricted to countable enums.
-
-```c++
-#include <aa/enum_utils/dictionary.hpp>
-
-enum class Colour
-{
-    Red,
-    Green,
-    Blue,
-
-    _Count
-};
-
-enum_dictionary(Colour) {
-    enum_entry("Red"),
-    enum_entry("Green"),
-    enum_entry("Blue")
-};
-
-// ...
-
-std::cout << aa::enum_utils::to_string(Colour::Blue);
-const auto c = aa::enum_utils::parse<Color>(...);
-```
-
-`aa::enum_utils::parse<E>` is (currently) case sensitive will return `aa::enum_utils::invalid<E>` when not match is found.
-
-## `enum_range`
-
-Exactly what you'd think
-
-```c++
-#include <aa/enum_utils/enum_range.hpp>
-
-for (const auto c : aa::enum_utils::enum_range<Colour>())
-{
-    // ...
-}
-```
-
-An `enum_range` for an `enum_array` can be accessed via `.indices()`
-
-```c++
-aa::enum_utils::enum_array<Colour, int> values{};
-
-for (const Colour c:  values.indices())
-{
-    // ...
-}
+values[Colour::Red] = 1;
+values[Colour::Green] = 23;
+values[Colour::Blue] = 456;
 ```
 
 ## flags
 
-Allows bitwise operators on specified enums.
+Allows bitwise operators on enums that contains `_Flags` (or `EU_FLAGS_IDENTIFIER`)
 
 ```c++
-#include <aa/enum_utils/flags.hpp>
+#include <eu/flags.hpp>
 
 enum class Options
 {
     Yes = 0x1,
     No = 0x2,
-    Cancel = 0x4
+    Cancel = 0x4,
+
+    _Flags
 };
 
-enum_flag(Options);
+using namespace eu::flags::operators;
 
 constexpr auto options = Options::Yes | Options::Cancel;
 ```
 
+If concepts are available, the `eu::flags` concept is available.
+
+`_Flags` should be defined _after the highest bit_. 
+
+`eu::mask<E>` / `eu::mask_v<E>` will provide the mask of all bits.
+
+```
+static_assert(eu::to_underlying(eu::mask_v<Options>) == 0x7);
+```
+
+Also provides some explicit flag-related functions `eu::flags::any`, `eu::flags::has`, `eu::flags::set`, and `eu::flags::unset`.
+
+## dictionary
+
+Provides simple enum-string conversions, but is restricted to countable enums. I don't necessarily recommend this, it's best use is probably to help debugging, but it's mostly fun template science project.
+
+Use `EU_DEFINE_NAME` to define an enums name.
+Use `EU_DEFINE_DEFAULT_NAME` will use the enum value as the name.
+
+```c++
+#include <eu/dictionary.hpp>
+
+enum class Colour
+{
+    Red,
+    Green,
+    LightBlue,
+
+    _Count
+};
+
+EU_DEFINE_DEFAULT_ENUM_NAME(Colour, Red);
+EU_DEFINE_DEFAULT_ENUM_NAME(Colour, Green);
+EU_DEFINE_ENUM_NAME(Colour, LightBlue, "Light Blue");
+
+
+// ...
+
+std::cout << eu::to_string(Colour::LightBlue);
+```
+
+## `range`
+
+```c++
+#include <eu/range.hpp>
+
+for (const auto c : eu::enum_range<Colour>())
+{
+    // ...
+}
+```
+
+An `range` for an `array` can be accessed via `.indices()`
+
+```c++
+eu::enum_array<Colour, int> values{};
+
+for (const Colour c : values.indices())
+{
+    // ...
+}
+```
+
 ## utility
 
-Contains implementations of `std::is_scoped_enum` and `std::to_underlying` for those not on c++23.
+Contains `eu::is_scoped_enum` and `eu::to_underlying` for those not on c++23.
 
 ## variant
+
+Also exists

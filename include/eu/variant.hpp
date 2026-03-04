@@ -1,29 +1,26 @@
-#ifndef __AA_EU_ENUM_VARIANT_HPP
-#define __AA_EU_ENUM_VARIANT_HPP
+#ifndef __EU_VARIANT_HPP
+#define __EU_VARIANT_HPP
 
 #include "countable.hpp"
 #include <variant>
 
-namespace aa
-{
-
-namespace enum_utils
+namespace eu
 {
 
 template <countable_enum E, typename... Ts>
-struct enum_variant : std::variant<Ts...>
+struct variant : std::variant<Ts...>
 {
 	using base_type = std::variant<Ts...>;
-	using self_type = enum_variant<E, Ts...>;
+	using this_type = variant<E, Ts...>;
 
 	template <typename T>
-	enum_variant(T&& value)
+	variant(T&& value)
 		: base_type{ value }
 	{
 	}
 
 	template <typename T>
-	self_type& operator=(T&& value)
+	this_type& operator=(T&& value)
 	{
 		base_type::operator=(value);
 		return *this;
@@ -34,7 +31,7 @@ struct enum_variant : std::variant<Ts...>
 		return static_cast<E>(base_type::index());
 	}
 
-	self_type& index(const E index)
+	this_type& index(const E index)
 	{
 		int ix = 0;
 		((ix++ == sphere::to_underlying(index) && (operator=(Ts{}), true)) || ...);
@@ -42,8 +39,6 @@ struct enum_variant : std::variant<Ts...>
 	}
 };
 
-} // enum_utils
+} // eu
 
-} // aa
-
-#endif // __AA_EU_ENUM_VARIANT_HPP
+#endif // __EU_VARIANT_HPP
