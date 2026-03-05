@@ -1,4 +1,4 @@
-# enum-utils (C++20)
+# enum-utils (C++17)
  These are a bunch of enum-related utilities that I actually use regularly, these are the kind of things that are totally obvious in hindsight.
 
 ## `countable_enum`
@@ -20,7 +20,7 @@ enum class Colour
 static_assert(eu::is_countable_enum_v<Colour>);
 ```
 
-If concepts are available, the `eu::countable_enum` concept is available.
+If concepts are available, `eu::countable_enum` is defined.
 
 `eu::enum_count<E>` / `eu::enum_count_v<E>` will provide the number of elements in the enum.
 
@@ -30,7 +30,7 @@ If concepts are available, the `eu::countable_enum` concept is available.
 
 ## `array`
 
-These are arrays that are indexed by a countable enum, from which the side is automatically deduced.
+These are arrays that are indexed by a countable enum, from which the size is automatically deduced. 
 
 ```c++
 #include <eu/array.hpp>
@@ -60,26 +60,28 @@ enum class Options
     _Flags
 };
 
+static_assert(eu::is_flags_v<Options>); 
+
 using namespace eu::flags::operators;
 
 constexpr auto options = Options::Yes | Options::Cancel;
 ```
 
-If concepts are available, the `eu::flags` concept is available.
+If concepts are available, `eu::flags_enum` is defined.
 
 `_Flags` should be defined _after the highest bit_. 
 
 `eu::mask<E>` / `eu::mask_v<E>` will provide the mask of all bits.
 
 ```
-static_assert(eu::to_underlying(eu::mask_v<Options>) == 0x7);
+static_assert(eu::mask_v<Options> == Options{ 0x7 });
 ```
 
 Also provides some explicit flag-related functions `eu::flags::any`, `eu::flags::has`, `eu::flags::set`, and `eu::flags::unset`.
 
 ## dictionary
 
-Provides simple enum-string conversions, but is restricted to countable enums. I don't necessarily recommend this, it's best use is probably to help debugging, but it's mostly fun template science project.
+Provides simple enum-string conversions, but is restricted to countable enums. I don't necessarily recommend this, its best use is probably to for debugging, but it's mostly fun template science project.
 
 Use `EU_DEFINE_NAME` to define an enums name.
 Use `EU_DEFINE_DEFAULT_NAME` will use the enum value as the name.
@@ -96,9 +98,9 @@ enum class Colour
     _Count
 };
 
-EU_DEFINE_DEFAULT_ENUM_NAME(Colour, Red);
-EU_DEFINE_DEFAULT_ENUM_NAME(Colour, Green);
-EU_DEFINE_ENUM_NAME(Colour, LightBlue, "Light Blue");
+EU_DEFINE_DEFAULT_NAME(Colour, Red);
+EU_DEFINE_DEFAULT_NAME(Colour, Green);
+EU_DEFINE_NAME(Colour, LightBlue, "Light-blue");
 
 
 // ...
